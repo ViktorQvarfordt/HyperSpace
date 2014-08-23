@@ -58,8 +58,7 @@ var dt = 0;
 var fps = 0;
 
 // Geometry
-var scale = 2;
-var aspectRatio = cnv.width / cnv.height;
+var scale = 1/2;
 var fieldOfView = Math.PI * 0.25;
 
 function metaCalc() {
@@ -98,13 +97,38 @@ function onLoop() {
   if (ui.keys['r'])     camera.tz += t;
 
   if (!ui.keys['ctrl']) {
-    if (ui.keys['j'])     camera.z  += k;
-    if (ui.keys['k'])     camera.z  -= k;
+    var xRotationMatrix = [
+      [1, 0, 0],
+      [0, Math.cos(-camera.tx), -Math.sin(-camera.tx)],
+      [0, Math.sin(-camera.tx), Math.cos(-camera.tx)]
+    ];
+    var yRotationMatrix = [
+      [Math.cos(-camera.ty), 0, Math.sin(-camera.ty)],
+      [0, 1, 0],
+      [-Math.sin(-camera.ty), 0, Math.cos(-camera.ty)],
+    ];
+    var zRotationMatrix = [
+      [Math.cos(-camera.tz), -Math.sin(-camera.tz), 0],
+      [Math.sin(-camera.tz), Math.cos(-camera.tz), 0],
+      [0, 0, 1],
+    ];
+    var rotationMatrix = linalg.mul(linalg.mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
+    var increment = linalg.mul(rotationMatrix, [[0], [0], [1]]);
+    if (ui.keys['j']) {
+      camera.x += increment[0] * k;
+      camera.y += increment[1] * k;
+      camera.z += increment[2] * k;
+    }
+    if (ui.keys['k']) {
+      camera.x -= increment[0] * k;
+      camera.y -= increment[1] * k;
+      camera.z -= increment[2] * k;
+    }
   }
 
   if (ui.keys['ctrl']) {
-    if (ui.keys['j']) camera.f += k/10;
-    if (ui.keys['k']) camera.f -= k/10;
+    if (ui.keys['j']) camera.f += k * camera.f;
+    if (ui.keys['k']) camera.f -= k * camera.f;
   }
 
   metadataOutput.textContent = JSON.stringify(
@@ -124,13 +148,17 @@ document.addEventListener('mousewheel', function(event) {
 function loop() {
   metaCalc();
 
-  onLoop(dt, timeNow);
+  onLoop();
 
   ctx.clear();
   ctx.save();
+  // origo at center of canvas
   ctx.translate(cnv.width / 2, cnv.height / 2);
-  ctx.scale(cnv.width / scale, cnv.height / scale);
-  ctx.lineWidth = scale / cnv.width;
+  // normalize length unit to height of canvas
+  var scaleFactor = cnv.height * scale;
+  ctx.scale(scaleFactor, scaleFactor);
+  // but don't scale line thickness
+  ctx.lineWidth = 1 / scaleFactor;
   render();
   ctx.restore();
 
@@ -140,24 +168,10 @@ function loop() {
 function render() {
   ctx.beginPath();
 
-  // ctx.moveTo(0.5*(-1+Math.cos(timeNow*3)), 0.5*(-1+Math.sin(timeNow*3)));
-  // ctx.lineTo(0.5*(1+Math.cos(timeNow*2)), 0.5*(1+Math.sin(timeNow*2)));
-  // ctx.lineTo(200 + 100*Math.cos(timeNow*5), 100 + 20*Math.sin(timeNow*6));
-  // ctx.moveTo(50 + 50*Math.cos(timeNow*3), 50 + 50*Math.sin(timeNow*10));
-  // ctx.lineTo(100, 200);
-
-  // Draw each edge in 2d graph.
-  // for (var i = 0; i < edges2.length; i++) {
-  //   var p0 = vertices2[edges2[i][0]];
-  //   var p1 = vertices2[edges2[i][1]];
-  //   ctx.moveTo(p0[0], p0[1]);
-  //   ctx.lineTo(p1[0], p1[1]);
-  // }
-
-  // Draw each edge of simple 2d projection of 3d graph.
+  // Draw each edge of 2d projection of 3d graph.
   for (var i = 0; i < edges3.length; i++) {
-    var p0 = linalg.projectPointFrom3dTo2d(vertices3[edges3[i][0]]);
-    var p1 = linalg.projectPointFrom3dTo2d(vertices3[edges3[i][1]]);
+    var p0 = linalg.projectPointFrom3dTo2d(vertices3[edges3[i][0]], camera);
+    var p1 = linalg.projectPointFrom3dTo2d(vertices3[edges3[i][1]], camera);
     ctx.moveTo(p0[0], p0[1]);
     ctx.lineTo(p1[0], p1[1]);
   }

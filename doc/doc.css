@@ -1,0 +1,27 @@
+body, pre {
+  margin: 0 !important;
+}
+
+pre {
+  font-size: 12px;
+  border-radius: 0 !important;
+}
+
+.fancy-comment {
+  /*font-family: Consolas, Monaco, 'Andale Mono', monospace;*/
+  padding: 0 5px;
+  background-color: #272822;
+  color: #f8f8f2;
+}
+
+p {
+  margin-left: 20px;
+}
+
+.fancy-comment:before {
+  content: "\\************************";
+}
+
+.fancy-comment:after {
+  content: "**************************\\ ";
+}
