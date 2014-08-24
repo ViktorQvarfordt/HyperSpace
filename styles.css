@@ -1,6 +1,8 @@
+/*
 html {
   background-color: #ddd;
 }
+
 canvas {
   background-color: white;
   border: 1px solid #888;
@@ -9,4 +11,24 @@ canvas {
   left: 50%;
   margin-left: -242.7px;
   margin-top: -151px;
+}
+*/
+
+html, body, canvas {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#meta {
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 5px;
+  left: 5px;
+}
+
+#meta > pre {
+  margin: 0;
+  padding: 0;
 }

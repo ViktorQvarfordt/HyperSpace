@@ -1,5 +1,8 @@
 var utils = {
   roundToOneDecimal: function(val) {
-    return +(Math.round(val+"e+1")+"e-1");
+    // No decimal if first decimal rounds to zero, returns a float.
+    // return +(Math.round(val+"e+1")+"e-1");
+    // Always one decimal, returns a string.
+    return val.toFixed(1);
   }
 };
