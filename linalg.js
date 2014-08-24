@@ -139,16 +139,16 @@ var linalg = (function() {
     ];
     var rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
 
-    // Rotate
-    line3d = [
-      transposeVector(mul(rotationMatrix, transposeVector(line3d[0]))),
-      transposeVector(mul(rotationMatrix, transposeVector(line3d[1])))
-    ];
-
     // Translate point relative to camera.
     line3d = [
       [line3d[0][0] - camera.x, line3d[0][1] - camera.y, line3d[0][2] - camera.z],
       [line3d[1][0] - camera.x, line3d[1][1] - camera.y, line3d[1][2] - camera.z]
+    ];
+
+    // Rotate
+    line3d = [
+      transposeVector(mul(rotationMatrix, transposeVector(line3d[0]))),
+      transposeVector(mul(rotationMatrix, transposeVector(line3d[1])))
     ];
 
     if (line3d[0][2] < 0 && line3d[1][2] < 0) {

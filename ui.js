@@ -67,6 +67,10 @@ var ui = (function() {
     '121': 'f10',
     '122': 'f11',
     '123': 'f12',
+
+    '186': ';',
+    '188': ',',
+    '190': '.'
   };
 
   var keysStr = '';
@@ -101,3 +105,6 @@ var ui = (function() {
   return ui;
 
 })();
+
+
+// MOUSE: https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
