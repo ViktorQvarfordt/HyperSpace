@@ -18,8 +18,8 @@ Fps.prototype.step = function() {
   }
 };
 
-function CanvasState() {
-  this.canvas = document.getElementById('canvas');
+function CanvasState(id) {
+  this.canvas = document.getElementById(id);
   this.context = this.canvas.getContext('2d');
   this.context.strokeStyle = 'black';
   this.fps = new Fps();
@@ -36,7 +36,7 @@ CanvasState.prototype.resize = function() {
   this.canvas.height = window.innerHeight;
 
   // Geometry
-  var scale = 1/2;
+  var scale = 1/2; // Document this?
   var fieldOfView = Math.PI * 0.25;
   var scaleFactor = this.canvas.height * scale;
 

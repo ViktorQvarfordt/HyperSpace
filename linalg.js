@@ -1,5 +1,6 @@
 var linalg = (function() {
 
+  // Matrix multiplication
   var mul = function(a, b) {
     var result = [];
     var i;
@@ -18,6 +19,42 @@ var linalg = (function() {
     }
     return result;
   };
+
+  // Scalar multiplication
+  var sMul = function(A, k) {
+    var result = [];
+    // Vector
+    if (typeof(A[0]) === 'number') {
+      for (var i = 0; i < A.length; i++) {
+        result[i] = A[i] * k;
+      }
+    }
+    // Matrix
+    else {
+      for (var i = 0; i < A.length; i++) {
+        result[i] = [];
+        for (var j = 0; j < A[0].length; j++) {
+          result[i][j] = A[i][j] * k;
+        }
+      }
+    }
+    return result;
+  };
+
+  var add = function(a, b) {
+    var result = [];
+    // vectors
+    if (typeof(a[0]) === 'number') {
+      for (var i = 0; i < a.length; i++) {
+        result[i] = a[i] + b[i];
+      }
+    }
+    return result;
+  }
+
+  var sub = function(a, b) {
+    return add(a, sMul(b, -1));
+  }
 
   var componentWiseOperation = function(a, b, op) {
     var result = [];
@@ -72,26 +109,26 @@ var linalg = (function() {
 
   var projectPointFrom3dTo2d = function(point, camera) {
     var xRotationMatrix = [
-    [1, 0, 0],
-    [0, Math.cos(camera.tx), -Math.sin(camera.tx)],
-    [0, Math.sin(camera.tx), Math.cos(camera.tx)]
+      [1, 0, 0],
+      [0, Math.cos(camera.a[0]), -Math.sin(camera.a[0])],
+      [0, Math.sin(camera.a[0]), Math.cos(camera.a[0])]
     ];
     var yRotationMatrix = [
-    [Math.cos(camera.ty), 0, Math.sin(camera.ty)],
-    [0, 1, 0],
-    [-Math.sin(camera.ty), 0, Math.cos(camera.ty)],
+      [Math.cos(camera.a[1]), 0, Math.sin(camera.a[1])],
+      [0, 1, 0],
+      [-Math.sin(camera.a[1]), 0, Math.cos(camera.a[1])],
     ];
     var zRotationMatrix = [
-    [Math.cos(camera.tz), -Math.sin(camera.tz), 0],
-    [Math.sin(camera.tz), Math.cos(camera.tz), 0],
-    [0, 0, 1],
+      [Math.cos(camera.a[2]), -Math.sin(camera.a[2]), 0],
+      [Math.sin(camera.a[2]), Math.cos(camera.a[2]), 0],
+      [0, 0, 1],
     ];
     var rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
 
     // var translationMatrix = [
-    //   [1, 0, 0, camera.x],
-    //   [0, 1, 0, camera.y],
-    //   [0, 0, 1, camera.z],
+    //   [1, 0, 0, camera.p[0]],
+    //   [0, 1, 0, camera.p[1]],
+    //   [0, 0, 1, camera.p[2]],
     //   [0, 0, 0, 1]
     // ];
     // point[3] = 1; // Homogenous coordinates.
@@ -99,10 +136,13 @@ var linalg = (function() {
     // point = mul(transformationMatrix, transposeVector(point));
 
     // Translate point relative to camera.
-    point = [point[0] - camera.x, point[1] - camera.y, point[2] - camera.z];
+    point = [point[0] - camera.p[0], point[1] - camera.p[1], point[2] - camera.p[2]];
 
     // Rotate
     point = transposeVector(mul(rotationMatrix, transposeVector(point)));
+
+    // Documentation: Pinhole camera
+    // TODO: The focal point should be *in front of* the projection plane! http://taishimizu.com/pictures/3d-considered-harmful/stereoscopic-projection-diagram
 
     // Project the 3-point onto the camera plane.
     /*
@@ -121,28 +161,28 @@ var linalg = (function() {
     return projectedPoint;
   };
 
-  var projectLineFrom3dTo2d = function(line3d, camera) {
+  var projectLineFrom3dTo2d = function(line3d, camera, eyeOffset) {
     var xRotationMatrix = [
       [1, 0, 0],
-      [0, Math.cos(camera.tx), -Math.sin(camera.tx)],
-      [0, Math.sin(camera.tx), Math.cos(camera.tx)]
+      [0, Math.cos(camera.a[0]), -Math.sin(camera.a[0])],
+      [0, Math.sin(camera.a[0]), Math.cos(camera.a[0])]
     ];
     var yRotationMatrix = [
-      [Math.cos(camera.ty), 0, Math.sin(camera.ty)],
+      [Math.cos(camera.a[1]), 0, Math.sin(camera.a[1])],
       [0, 1, 0],
-      [-Math.sin(camera.ty), 0, Math.cos(camera.ty)],
+      [-Math.sin(camera.a[1]), 0, Math.cos(camera.a[1])],
     ];
     var zRotationMatrix = [
-      [Math.cos(camera.tz), -Math.sin(camera.tz), 0],
-      [Math.sin(camera.tz), Math.cos(camera.tz), 0],
+      [Math.cos(camera.a[2]), -Math.sin(camera.a[2]), 0],
+      [Math.sin(camera.a[2]), Math.cos(camera.a[2]), 0],
       [0, 0, 1],
     ];
     var rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
 
     // Translate point relative to camera.
     line3d = [
-      [line3d[0][0] - camera.x, line3d[0][1] - camera.y, line3d[0][2] - camera.z],
-      [line3d[1][0] - camera.x, line3d[1][1] - camera.y, line3d[1][2] - camera.z]
+      [line3d[0][0] - camera.p[0] + eyeOffset, line3d[0][1] - camera.p[1], line3d[0][2] - camera.p[2]],
+      [line3d[1][0] - camera.p[0] + eyeOffset, line3d[1][1] - camera.p[1], line3d[1][2] - camera.p[2]]
     ];
 
     // Rotate
@@ -187,7 +227,10 @@ var linalg = (function() {
     perspective: perspective,
     projectPointFrom3dTo2d: projectPointFrom3dTo2d,
     projectLineFrom3dTo2d: projectLineFrom3dTo2d,
+    add: add,
     mul: mul,
+    sMul: sMul,
+    sub: sub,
     transposeVector: transposeVector,
     componentWiseOperation: componentWiseOperation
   };

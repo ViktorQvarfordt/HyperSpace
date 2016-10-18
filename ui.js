@@ -73,17 +73,18 @@ var ui = (function() {
     '190': '.'
   };
 
-  var keysStr = '';
-
   function updateKeyMap(event) {
+
     if ((event.type == 'keydown')) {
       ui.keys[keyCodeMap[event.keyCode]] = true;
     } else {
       delete ui.keys[keyCodeMap[event.keyCode]];
     }
-    keysStr = Object.keys(ui.keys).join('+');
-    if (shouldPreventDefault())
+
+    if (shouldPreventDefault()) {
       event.preventDefault();
+    }
+
   }
 
   var keyCombinationsToPreventDefaultFor = [];
@@ -93,9 +94,8 @@ var ui = (function() {
   };
 
   function shouldPreventDefault() {
-    return keyCombinationsToPreventDefaultFor.some(function(keyComb) {
-      return keyComb === keysStr;
-    });
+    var keysStr = Object.keys(ui.keys).join('+');
+    return keyCombinationsToPreventDefaultFor.some(function(keyComb) { return keyComb === keysStr; });
   }
 
   document.addEventListener('keydown', updateKeyMap);
