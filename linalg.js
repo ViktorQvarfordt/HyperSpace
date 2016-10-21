@@ -126,9 +126,9 @@ let linalg = (function() {
     let rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
 
     // let translationMatrix = [
-    //   [1, 0, 0, camera.p[0]],
-    //   [0, 1, 0, camera.p[1]],
-    //   [0, 0, 1, camera.p[2]],
+    //   [1, 0, 0, camera.x[0]],
+    //   [0, 1, 0, camera.x[1]],
+    //   [0, 0, 1, camera.x[2]],
     //   [0, 0, 0, 1]
     // ];
     // point[3] = 1; // Homogenous coordinates.
@@ -136,7 +136,7 @@ let linalg = (function() {
     // point = mul(transformationMatrix, transposeVector(point));
 
     // Translate point relative to camera.
-    point = [point[0] - camera.p[0], point[1] - camera.p[1], point[2] - camera.p[2]];
+    point = [point[0] - camera.x[0], point[1] - camera.x[1], point[2] - camera.x[2]];
 
     // Rotate
     point = transposeVector(mul(rotationMatrix, transposeVector(point)));
@@ -161,7 +161,7 @@ let linalg = (function() {
     return projectedPoint;
   };
 
-  let projectLineFrom3dTo2d = function(line3d, camera, eyeOffset) {
+  let projectLineFrom3dTo2d = function(line3d, camera) {
     let xRotationMatrix = [
       [1, 0, 0],
       [0, Math.cos(camera.a[0]), -Math.sin(camera.a[0])],
@@ -181,8 +181,8 @@ let linalg = (function() {
 
     // Translate point relative to camera.
     line3d = [
-      [line3d[0][0] - camera.p[0] + eyeOffset, line3d[0][1] - camera.p[1], line3d[0][2] - camera.p[2]],
-      [line3d[1][0] - camera.p[0] + eyeOffset, line3d[1][1] - camera.p[1], line3d[1][2] - camera.p[2]]
+      [line3d[0][0] - camera.x[0], line3d[0][1] - camera.x[1], line3d[0][2] - camera.x[2]],
+      [line3d[1][0] - camera.x[0], line3d[1][1] - camera.x[1], line3d[1][2] - camera.x[2]]
     ];
 
     // Rotate

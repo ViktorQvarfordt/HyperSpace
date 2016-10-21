@@ -32,8 +32,8 @@ let cube3d = {
 
 let world3d = {
   observer: {
-    p: [0, 0, -3], // position [x, y, z]
-    a: [0, 0, 0],  // angle relative axes [x, y, z]
+    x: [0, 0, -3], // position [x1, x2, x3]
+    a: [0, 0, 0],  // angle relative to the axes [x1, x2, x3]
     f: 1
   },
   drawCoordinateSystem: function(context) {
@@ -101,21 +101,27 @@ let world3d = {
       // let r = context.canvas.width / context.canvas.height / 2;
       let r = context.canvas.width / context.canvas.height / 2;
       let eyeOffset = 0.15;
+      let line2d;
 
       // Left eye
-      let line2d;
-      line2d = linalg.projectLineFrom3dTo2d([cube3d.vertices[cube3d.edges[i][0]], cube3d.vertices[cube3d.edges[i][1]]], this.observer, -eyeOffset);
+      this.observer.x[0] -= eyeOffset;
+      line2d = linalg.projectLineFrom3dTo2d([cube3d.vertices[cube3d.edges[i][0]], cube3d.vertices[cube3d.edges[i][1]]], this.observer);
       if (line2d) {
         context.moveTo(line2d[0][0] - r, line2d[0][1]);
         context.lineTo(line2d[1][0] - r, line2d[1][1]);
       }
 
       // Right eye
-      line2d = linalg.projectLineFrom3dTo2d([cube3d.vertices[cube3d.edges[i][0]], cube3d.vertices[cube3d.edges[i][1]]], this.observer, eyeOffset);
+      this.observer.x[0] += 2*eyeOffset;
+      line2d = linalg.projectLineFrom3dTo2d([cube3d.vertices[cube3d.edges[i][0]], cube3d.vertices[cube3d.edges[i][1]]], this.observer);
       if (line2d) {
         context.moveTo(line2d[0][0] + r, line2d[0][1]);
         context.lineTo(line2d[1][0] + r, line2d[1][1]);
       }
+
+      // Reset camera
+      this.observer.x[0] -= eyeOffset;
+
 
     }
     context.strokeStyle = "#000";
@@ -247,37 +253,37 @@ let app = {
       if (ui.keys.j) {
         let zHat = [0, 0, 1];
         let zHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(zHat)));
-        world3d.observer.p = linalg.add(world3d.observer.p, linalg.sMul(zHatTransformed, k));
+        world3d.observer.x = linalg.add(world3d.observer.x, linalg.sMul(zHatTransformed, k));
       }
 
       if (ui.keys.k) {
         let yHat = [0, 0, 1];
         let yHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(yHat)));
-        world3d.observer.p = linalg.sub(world3d.observer.p, linalg.sMul(yHatTransformed, k));
+        world3d.observer.x = linalg.sub(world3d.observer.x, linalg.sMul(yHatTransformed, k));
       }
 
       if (ui.keys.l) {
         let xHat = [1, 0, 0];
         let xHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(xHat)));
-        world3d.observer.p = linalg.add(world3d.observer.p, linalg.sMul(xHatTransformed, k));
+        world3d.observer.x = linalg.add(world3d.observer.x, linalg.sMul(xHatTransformed, k));
       }
 
       if (ui.keys.h) {
         let xHat = [1, 0, 0];
         let xHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(xHat)));
-        world3d.observer.p = linalg.sub(world3d.observer.p, linalg.sMul(xHatTransformed, k));
+        world3d.observer.x = linalg.sub(world3d.observer.x, linalg.sMul(xHatTransformed, k));
       }
 
       if (ui.keys[',']) {
         let yHat = [0, 1, 0];
         let yHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(yHat)));
-        world3d.observer.p = linalg.add(world3d.observer.p, linalg.sMul(yHatTransformed, k));
+        world3d.observer.x = linalg.add(world3d.observer.x, linalg.sMul(yHatTransformed, k));
       }
 
       if (ui.keys.i) {
         let yHat = [0, 1, 0];
         let yHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(yHat)));
-        world3d.observer.p = linalg.sub(world3d.observer.p, linalg.sMul(yHatTransformed, k));
+        world3d.observer.x = linalg.sub(world3d.observer.x, linalg.sMul(yHatTransformed, k));
       }
 
     }
