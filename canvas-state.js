@@ -11,7 +11,7 @@ Fps.prototype.step = function() {
   this.frameCount++;
   // Calculate FPS as a running average.
   if ((Date.now() - this.prevCheck) > this.delay) {
-    var currentFps = this.frameCount * 1000 / (Date.now() - this.prevCheck) || 0;
+    let currentFps = this.frameCount * 1000 / (Date.now() - this.prevCheck) || 0;
     this.prevCheck = Date.now();
     this.frameCount = 0;
     this.onUpdate(currentFps.toFixed(1));
@@ -36,9 +36,9 @@ CanvasState.prototype.resize = function() {
   this.canvas.height = window.innerHeight;
 
   // Geometry
-  var scale = 1/2; // Document this?
-  var fieldOfView = Math.PI * 0.25;
-  var scaleFactor = this.canvas.height * scale;
+  let scale = 1/2; // Document this?
+  let fieldOfView = Math.PI * 0.25;
+  let scaleFactor = this.canvas.height * scale;
 
   this.context.translate(this.canvas.width / 2, this.canvas.height / 2);
   this.context.scale(scaleFactor, scaleFactor);
@@ -52,10 +52,10 @@ CanvasState.prototype.clear = function() {
 };
 
 CanvasState.prototype.loop = function(callback) {
-  var timePrev;
-  var mainLoop = function() {
+  let timePrev;
+  let mainLoop = function() {
     window.requestAnimationFrame(mainLoop);
-    var dt = (Date.now() - timePrev)/1000 || 0;  // In the case of timePrev being undefined.
+    let dt = (Date.now() - timePrev)/1000 || 0;  // In the case of timePrev being undefined.
     timePrev = Date.now();
     this.fps.step();
     // Clear the context so that we provide a fresh context to the callback.
@@ -70,7 +70,7 @@ CanvasState.prototype.loop = function(callback) {
   // origo at center of canvas
   // context.translate(canvas.width / 2, canvas.height / 2);
   // normalize length unit to height of canvas
-  // var scaleFactor = canvas.height * scale;
+  // let scaleFactor = canvas.height * scale;
   // context.scale(scaleFactor, scaleFactor);
   // but don't scale line thickness
   // context.restore();

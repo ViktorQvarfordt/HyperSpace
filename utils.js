@@ -1,4 +1,4 @@
-var utils = {
+let utils = {
   roundToOneDecimal: function(val) {
     // No decimal if first decimal rounds to zero, returns a float.
     return +(Math.round(val+"e+1")+"e-1") || 0;

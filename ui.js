@@ -1,13 +1,13 @@
 // ui.keys['a'] is true if the key 'a' is being pressed.
 
 
-var ui = (function() {
+let ui = (function() {
 
-  var ui = {
+  let ui = {
     keys: {}
   };
 
-  var keyCodeMap = {
+  let keyCodeMap = {
     '16': 'shift',
     '17': 'ctrl',
     '18': 'alt',
@@ -75,7 +75,7 @@ var ui = (function() {
 
   function updateKeyMap(event) {
 
-    if ((event.type == 'keydown')) {
+    if ((event.type === 'keydown')) {
       ui.keys[keyCodeMap[event.keyCode]] = true;
     } else {
       delete ui.keys[keyCodeMap[event.keyCode]];
@@ -87,14 +87,14 @@ var ui = (function() {
 
   }
 
-  var keyCombinationsToPreventDefaultFor = [];
+  let keyCombinationsToPreventDefaultFor = [];
 
   ui.preventDefaultFor = function(string) {
     keyCombinationsToPreventDefaultFor = string.split(' ');
   };
 
   function shouldPreventDefault() {
-    var keysStr = Object.keys(ui.keys).join('+');
+    let keysStr = Object.keys(ui.keys).join('+');
     return keyCombinationsToPreventDefaultFor.some(function(keyComb) { return keyComb === keysStr; });
   }
 

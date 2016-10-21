@@ -1,12 +1,12 @@
-var linalg = (function() {
+let linalg = (function() {
 
   // Matrix multiplication
-  var mul = function(a, b) {
-    var result = [];
-    var i;
-    var j;
-    var k;
-    var sum;
+  let mul = function(a, b) {
+    let result = [];
+    let i;
+    let j;
+    let k;
+    let sum;
     for (i = 0; i < a.length; i++) {
       result[i] = [];
       for (j = 0; j < b[0].length; j++) {
@@ -21,19 +21,19 @@ var linalg = (function() {
   };
 
   // Scalar multiplication
-  var sMul = function(A, k) {
-    var result = [];
+  let sMul = function(A, k) {
+    let result = [];
     // Vector
     if (typeof(A[0]) === 'number') {
-      for (var i = 0; i < A.length; i++) {
+      for (let i = 0; i < A.length; i++) {
         result[i] = A[i] * k;
       }
     }
     // Matrix
     else {
-      for (var i = 0; i < A.length; i++) {
+      for (let i = 0; i < A.length; i++) {
         result[i] = [];
-        for (var j = 0; j < A[0].length; j++) {
+        for (let j = 0; j < A[0].length; j++) {
           result[i][j] = A[i][j] * k;
         }
       }
@@ -41,25 +41,25 @@ var linalg = (function() {
     return result;
   };
 
-  var add = function(a, b) {
-    var result = [];
+  let add = function(a, b) {
+    let result = [];
     // vectors
     if (typeof(a[0]) === 'number') {
-      for (var i = 0; i < a.length; i++) {
+      for (let i = 0; i < a.length; i++) {
         result[i] = a[i] + b[i];
       }
     }
     return result;
-  }
+  };
 
-  var sub = function(a, b) {
+  let sub = function(a, b) {
     return add(a, sMul(b, -1));
-  }
+  };
 
-  var componentWiseOperation = function(a, b, op) {
-    var result = [];
-    var i;
-    var j;
+  let componentWiseOperation = function(a, b, op) {
+    let result = [];
+    let i;
+    let j;
     if (typeof a[0] === 'number') {
       for (i = 0; i < a.length; i++) {
         result[i] = op(a[i], b[i]);
@@ -76,9 +76,9 @@ var linalg = (function() {
     return result;
   };
 
-  var transposeVector = function(a) {
-    var result = [];
-    var i;
+  let transposeVector = function(a) {
+    let result = [];
+    let i;
     // column to row
     if (typeof a[0] === 'number') {
       for (i = 0; i < a.length; i++) {
@@ -95,9 +95,9 @@ var linalg = (function() {
     }
   };
 
-  var perspective = function(angle, aspectRatio, near, far) {
-    var f = Math.tan(Math.PI * 0.5 - 0.5 * angle);
-    var rangeInv = 1.0 / (near - far);
+  let perspective = function(angle, aspectRatio, near, far) {
+    let f = Math.tan(Math.PI * 0.5 - 0.5 * angle);
+    let rangeInv = 1.0 / (near - far);
 
     return [
     [f / aspectRatio, 0, 0, 0],
@@ -107,32 +107,32 @@ var linalg = (function() {
     ];
   };
 
-  var projectPointFrom3dTo2d = function(point, camera) {
-    var xRotationMatrix = [
+  let projectPointFrom3dTo2d = function(point, camera) {
+    let xRotationMatrix = [
       [1, 0, 0],
       [0, Math.cos(camera.a[0]), -Math.sin(camera.a[0])],
       [0, Math.sin(camera.a[0]), Math.cos(camera.a[0])]
     ];
-    var yRotationMatrix = [
+    let yRotationMatrix = [
       [Math.cos(camera.a[1]), 0, Math.sin(camera.a[1])],
       [0, 1, 0],
       [-Math.sin(camera.a[1]), 0, Math.cos(camera.a[1])],
     ];
-    var zRotationMatrix = [
+    let zRotationMatrix = [
       [Math.cos(camera.a[2]), -Math.sin(camera.a[2]), 0],
       [Math.sin(camera.a[2]), Math.cos(camera.a[2]), 0],
       [0, 0, 1],
     ];
-    var rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
+    let rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
 
-    // var translationMatrix = [
+    // let translationMatrix = [
     //   [1, 0, 0, camera.p[0]],
     //   [0, 1, 0, camera.p[1]],
     //   [0, 0, 1, camera.p[2]],
     //   [0, 0, 0, 1]
     // ];
     // point[3] = 1; // Homogenous coordinates.
-    // var transformationMatrix = mul(rotationMatrix, translationMatrix);
+    // let transformationMatrix = mul(rotationMatrix, translationMatrix);
     // point = mul(transformationMatrix, transposeVector(point));
 
     // Translate point relative to camera.
@@ -156,28 +156,28 @@ var linalg = (function() {
       that is when $t=\frac{f}{z+f}$. Thus the projected point is given by
       \[ \tilde{p} = \frac{f}{z+f}\pmatrix{x\\y} \]
     */
-    var t = camera.f / (point[2] + camera.f);
-    var projectedPoint = [t * point[0], t * point[1]];
+    let t = camera.f / (point[2] + camera.f);
+    let projectedPoint = [t * point[0], t * point[1]];
     return projectedPoint;
   };
 
-  var projectLineFrom3dTo2d = function(line3d, camera, eyeOffset) {
-    var xRotationMatrix = [
+  let projectLineFrom3dTo2d = function(line3d, camera, eyeOffset) {
+    let xRotationMatrix = [
       [1, 0, 0],
       [0, Math.cos(camera.a[0]), -Math.sin(camera.a[0])],
       [0, Math.sin(camera.a[0]), Math.cos(camera.a[0])]
     ];
-    var yRotationMatrix = [
+    let yRotationMatrix = [
       [Math.cos(camera.a[1]), 0, Math.sin(camera.a[1])],
       [0, 1, 0],
       [-Math.sin(camera.a[1]), 0, Math.cos(camera.a[1])],
     ];
-    var zRotationMatrix = [
+    let zRotationMatrix = [
       [Math.cos(camera.a[2]), -Math.sin(camera.a[2]), 0],
       [Math.sin(camera.a[2]), Math.cos(camera.a[2]), 0],
       [0, 0, 1],
     ];
-    var rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
+    let rotationMatrix = mul(mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
 
     // Translate point relative to camera.
     line3d = [
@@ -214,9 +214,9 @@ var linalg = (function() {
       that is when $t=\frac{f}{z+f}$. Thus the projected point is given by
       \[ \tilde{p} = \frac{f}{z+f}\pmatrix{x\\y} \]
     */
-    var t0 = camera.f / (line3d[0][2] + camera.f);
-    var t1 = camera.f / (line3d[1][2] + camera.f);
-    var projectedLine = [
+    let t0 = camera.f / (line3d[0][2] + camera.f);
+    let t1 = camera.f / (line3d[1][2] + camera.f);
+    let projectedLine = [
                           [t0 * line3d[0][0], t0 * line3d[0][1]],
                           [t1 * line3d[1][0], t1 * line3d[1][1]]
                         ];
