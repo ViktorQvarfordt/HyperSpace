@@ -32,9 +32,26 @@ let cube3d = {
 
 let world3d = {
   observer: {
-    x: [0, 0, -3], // position [x1, x2, x3]
+    p: [0, 0, -5], // position [x1, x2, x3]
     a: [0, 0, 0],  // angle relative to the axes [x1, x2, x3]
     f: 1
+  },
+  drawUnitVectors: function(context) {
+    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [1, 0, 0]], this.observer);
+    context.moveTo(line2d[0][0], line2d[0][1]);
+    context.lineTo(line2d[1][0], line2d[1][1]);
+
+    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [0, 1, 0]], this.observer);
+    context.moveTo(line2d[0][0], line2d[0][1]);
+    context.lineTo(line2d[1][0], line2d[1][1]);
+
+    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [0, 0, 1]], this.observer);
+    context.moveTo(line2d[0][0], line2d[0][1]);
+    context.lineTo(line2d[1][0], line2d[1][1]);
+
+    // Draw
+    context.strokeStyle = "#f00";
+    context.stroke();
   },
   drawCoordinateSystem: function(context) {
     let k = 10;
@@ -98,13 +115,12 @@ let world3d = {
 
       // Do it for lines rather than points, to clip the line when it's on the wrong side of the projection plane.
 
-      // let r = context.canvas.width / context.canvas.height / 2;
       let r = context.canvas.width / context.canvas.height / 2;
       let eyeOffset = 0.15;
       let line2d;
 
       // Left eye
-      this.observer.x[0] -= eyeOffset;
+      this.observer.p[0] -= eyeOffset;
       line2d = linalg.projectLineFrom3dTo2d([cube3d.vertices[cube3d.edges[i][0]], cube3d.vertices[cube3d.edges[i][1]]], this.observer);
       if (line2d) {
         context.moveTo(line2d[0][0] - r, line2d[0][1]);
@@ -112,7 +128,7 @@ let world3d = {
       }
 
       // Right eye
-      this.observer.x[0] += 2*eyeOffset;
+      this.observer.p[0] += 2*eyeOffset;
       line2d = linalg.projectLineFrom3dTo2d([cube3d.vertices[cube3d.edges[i][0]], cube3d.vertices[cube3d.edges[i][1]]], this.observer);
       if (line2d) {
         context.moveTo(line2d[0][0] + r, line2d[0][1]);
@@ -120,7 +136,7 @@ let world3d = {
       }
 
       // Reset camera
-      this.observer.x[0] -= eyeOffset;
+      this.observer.p[0] -= eyeOffset;
 
 
     }
@@ -136,6 +152,7 @@ let world3d = {
   },
   render: function(context) {
     // this.drawCoordinateSystem(context);
+    this.drawUnitVectors(context);
     this.drawCube(context);
     this.drawSeparator(context);
   }
@@ -181,121 +198,108 @@ let app = {
   },
   reactToUserInput: function() {
 
-    let xRotationMatrix = [
-      [1, 0, 0],
-      [0, Math.cos(-world3d.observer.a[0]), -Math.sin(-world3d.observer.a[0])],
-      [0, Math.sin(-world3d.observer.a[0]), Math.cos(-world3d.observer.a[0])]
-    ];
-    let yRotationMatrix = [
-      [Math.cos(-world3d.observer.a[1]), 0, Math.sin(-world3d.observer.a[1])],
-      [0, 1, 0],
-      [-Math.sin(-world3d.observer.a[1]), 0, Math.cos(-world3d.observer.a[1])],
-    ];
-    let zRotationMatrix = [
-      [Math.cos(-world3d.observer.a[2]), -Math.sin(-world3d.observer.a[2]), 0],
-      [Math.sin(-world3d.observer.a[2]), Math.cos(-world3d.observer.a[2]), 0],
-      [0, 0, 1],
-    ];
-    let rotationMatrix = linalg.mul(linalg.mul(xRotationMatrix, yRotationMatrix), zRotationMatrix);
+    let a = utils.clone(world3d.observer.a);
+    a = linalg.sMul(a, -1);
+    let rotationMatrix = linalg.getRotationMatrix(a);
 
-    let k = 0.25; // posiiton increment factor
-    let t = 0.05; // angle increment factor
+    let pInc = 0.25; // position increment
+    let aInc = 0.05; // angle increment
 
-    if (ui.keys.right) world3d.observer.x  += k;
-    if (ui.keys.left)  world3d.observer.x  -= k;
-    if (ui.keys.up)    world3d.observer.y  -= k;
-    if (ui.keys.down)  world3d.observer.y  += k;
+    if (ui.keys.right) world3d.observer.p  += pInc;
+    if (ui.keys.left)  world3d.observer.p  -= pInc;
+    if (ui.keys.up)    world3d.observer.y  -= pInc;
+    if (ui.keys.down)  world3d.observer.y  += pInc;
 
     if (ui.keys.s) {
       let r = [0, 1, 0];
-      // let rTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(r)));
-      // world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(rTransformed, t));
-      world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(r, t));
+      // let rTransformed = linalg.mul(rotationMatrix, r);
+      // world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
     if (ui.keys.f) {
       let r = [0, 1, 0];
-      // let rTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(r)));
-      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, t));
-      world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, t));
+      // let rTransformed = linalg.mul(rotationMatrix, r);
+      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
     if (ui.keys.d) {
       let r = [1, 0, 0];
-      // let rTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(r)));
-      // world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(rTransformed, t));
-      world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(r, t));
+      // let rTransformed = linalg.mul(rotationMatrix, r);
+      // world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
     if (ui.keys.e) {
       let r = [1, 0, 0];
-      // let rTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(r)));
-      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, t));
-      world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, t));
+      // let rTransformed = linalg.mul(rotationMatrix, r);
+      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
     if (ui.keys.r) {
       let r = [0, 0, 1];
-      // let rTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(r)));
-      // world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(rTransformed, t));
-      world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(r, t));
+      // let rTransformed = linalg.mul(rotationMatrix, r);
+      // world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      world3d.observer.a = linalg.add(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
     if (ui.keys.w) {
       let r = [0, 0, 1];
-      // let rTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(r)));
-      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, t));
-      world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, t));
+      // let rTransformed = linalg.mul(rotationMatrix, r);
+      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
     if (!ui.keys.ctrl) {
 
       if (ui.keys.j) {
-        let zHat = [0, 0, 1];
-        let zHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(zHat)));
-        world3d.observer.x = linalg.add(world3d.observer.x, linalg.sMul(zHatTransformed, k));
+        let r = [0, 0, 1];
+        r = linalg.mul(rotationMatrix, r);
+        world3d.observer.p = linalg.add(world3d.observer.p, linalg.sMul(r, pInc));
       }
 
       if (ui.keys.k) {
-        let yHat = [0, 0, 1];
-        let yHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(yHat)));
-        world3d.observer.x = linalg.sub(world3d.observer.x, linalg.sMul(yHatTransformed, k));
+        let r = [0, 0, 1];
+        r = linalg.mul(rotationMatrix, r);
+        world3d.observer.p = linalg.sub(world3d.observer.p, linalg.sMul(r, pInc));
       }
 
       if (ui.keys.l) {
         let xHat = [1, 0, 0];
-        let xHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(xHat)));
-        world3d.observer.x = linalg.add(world3d.observer.x, linalg.sMul(xHatTransformed, k));
+        let xHatTransformed = linalg.mul(rotationMatrix, xHat);
+        world3d.observer.p = linalg.add(world3d.observer.p, linalg.sMul(xHatTransformed, pInc));
       }
 
       if (ui.keys.h) {
         let xHat = [1, 0, 0];
-        let xHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(xHat)));
-        world3d.observer.x = linalg.sub(world3d.observer.x, linalg.sMul(xHatTransformed, k));
+        let xHatTransformed = linalg.mul(rotationMatrix, xHat);
+        world3d.observer.p = linalg.sub(world3d.observer.p, linalg.sMul(xHatTransformed, pInc));
       }
 
       if (ui.keys[',']) {
         let yHat = [0, 1, 0];
-        let yHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(yHat)));
-        world3d.observer.x = linalg.add(world3d.observer.x, linalg.sMul(yHatTransformed, k));
+        let yHatTransformed = linalg.mul(rotationMatrix, yHat);
+        world3d.observer.p = linalg.add(world3d.observer.p, linalg.sMul(yHatTransformed, pInc));
       }
 
       if (ui.keys.i) {
         let yHat = [0, 1, 0];
-        let yHatTransformed = linalg.transposeVector(linalg.mul(rotationMatrix, linalg.transposeVector(yHat)));
-        world3d.observer.x = linalg.sub(world3d.observer.x, linalg.sMul(yHatTransformed, k));
+        let yHatTransformed = linalg.mul(rotationMatrix, yHat);
+        world3d.observer.p = linalg.sub(world3d.observer.p, linalg.sMul(yHatTransformed, pInc));
       }
 
     }
 
     if (ui.keys.ctrl) {
-      if (ui.keys.j) world3d.observer.f += k * world3d.observer.f;
-      if (ui.keys.k) world3d.observer.f -= k * world3d.observer.f;
+      if (ui.keys.j) world3d.observer.f += pInc * world3d.observer.f;
+      if (ui.keys.k) world3d.observer.f -= pInc * world3d.observer.f;
     }
 
   },
   init: function() {
-    ui.preventDefaultFor('right left up down f s e d w r j k ctrl+j ctrl+k');
+    ui.preventDefaultFor('right left up down f s e d w r j pInc ctrl+j ctrl+k');
     this.canvasState.fps.onUpdate = this.updateFps.bind(this);
     this.canvasState.loop(function() {
       this.reactToUserInput();
@@ -306,3 +310,5 @@ let app = {
 };
 
 app.init();
+
+count = 0;

@@ -32,3 +32,15 @@ html, body, canvas {
   margin: 0;
   padding: 0;
 }
+
+#about {
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 5px;
+  right: 5px;
+}
+
+a { text-decoration: none; color: inherit; }
+a:hover { text-decoration: underline; }
+a:visited { color: inherit; }
