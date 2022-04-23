@@ -13,7 +13,7 @@ How to project four dimensions onto two two dimensions, i.e. the screen? Let's d
 
 There are various types of projections. We want to mimic the eye. The image captured by the eye consists of all rays passing through the pupil and intersecting the retina. The eye has a lens for practical/physical reasons, lets ignore this. The eye is essentially a [pinhole camera](https://en.wikipedia.org/wiki/Pinhole_camera). In our idealized mathematical world, this is all we need, things are never out of focus. The pupil is the *focal point* and the retina is the *projection plane* (the screen).
 
-We model space by $\mathbb{R}^3$. Let $\vec{p}$ be the focal point, let $\vec{d}$ be the unit vector in the direction in which we look, let the projection plane be the plane normal to $\vec{d}$ going through the point $\vec{p} - f\vec{d}$, where $f$ is the focal length. Any point $\vec{q}$ in the projection plane can the satisfies
+We model space by $\mathbb{R}^3$. Let $\vec{p}$ be the focal point, let $\vec{d}$ be the unit vector in the direction in which we look, let the projection plane be the plane normal to $\vec{d}$ going through the point $\vec{p} - f\vec{d}$, where $f$ is the focal length. A point $\vec{q}$ is in the projection plane iff
 \[ (\vec{q} - (\vec{p} - f\vec{d})) \cdot \vec{d} = 0. \]
 
 
@@ -21,7 +21,7 @@ We model space by $\mathbb{R}^3$. Let $\vec{p}$ be the focal point, let $\vec{d}
 Thus, the projection plane is
 \[ d_1 x + d_2 y + d_3 z = D \]
 where we determine $D$ by plugging in $\vec{p} - f\vec{d}$, thus $D = \vec{d} \cdot (\vec{p} - f \vec{d})$.
- -->
+-->
 
 Let
 \[ \vec{r} = \pmatrix{x \\ y \\ z} \]
@@ -31,7 +31,7 @@ This ray intersects the projection plane when it satisfies the equation for the 
 \[ (\vec{r} + t (\vec{p} - \vec{r}) - (\vec{p} - f\vec{d})) \cdot \vec{d} = 0 \]
 that is for
 \[ t = \frac{(\vec{p}-f\vec{d}-r) \cdot \vec{d}}{(\vec{p}-\vec{r})\cdot\vec{d}} \]
-when $t z = f$, that is for $t = f/z$. Thus the projected point (in projection plane) is given by
+when $t z = f$, that is for $t = f/z$. Thus the projected point (in the projection plane) is given by
 \[ \vec{p}_\text{proj} = \frac{f}{z}\pmatrix{x \\ y}. \]
 
 

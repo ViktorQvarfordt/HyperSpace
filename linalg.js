@@ -246,11 +246,12 @@ let linalg = (function() {
       [line3d[1][0], line3d[1][1]]
     ];
 
-    if (count < 10) {
-      console.log('---');
-      console.log(projectedLineOrig[0], t0, t1, projectedLine[0]);
-      count++;
-    }
+    // Can be removed
+    // if (count < 10) {
+    //   console.log('---');
+    //   console.log(projectedLineOrig[0], t0, t1, projectedLine[0]);
+    //   count++;
+    // }
 
     return projectedLine;
   };

@@ -1,31 +1,31 @@
 /* global linalg, ui, utils, CanvasState */
 
 let cube3d = {
-  // Each edge consits of two endpoints, being indices of vertices.
-  edges: [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 0],
-  [4, 5],
-  [5, 6],
-  [6, 7],
-  [7, 4],
-  [0, 4],
-  [1, 5],
-  [2, 6],
-  [3, 7]
-  ],
-  // These are the actual spatial coordinates for each vertex.
+  // Spatial coordinates for each vertex.
   vertices: [
-  [-1, -1, -1],
-  [ 1, -1, -1],
-  [ 1,  1, -1],
-  [-1,  1, -1],
-  [-1, -1,  1],
-  [ 1, -1,  1],
-  [ 1,  1,  1],
-  [-1,  1,  1]
+    [-1, -1, -1],
+    [ 1, -1, -1],
+    [ 1,  1, -1],
+    [-1,  1, -1],
+    [-1, -1,  1],
+    [ 1, -1,  1],
+    [ 1,  1,  1],
+    [-1,  1,  1]
+  ],
+  // Each edge consits of two endpoints, vertex indices.
+  edges: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 0],
+    [4, 5],
+    [5, 6],
+    [6, 7],
+    [7, 4],
+    [0, 4],
+    [1, 5],
+    [2, 6],
+    [3, 7]
   ]
 };
 
@@ -34,24 +34,39 @@ let world3d = {
   observer: {
     p: [0, 0, -5], // position [x1, x2, x3]
     a: [0, 0, 0],  // angle relative to the axes [x1, x2, x3]
-    f: 1
+    f: 1,
+    eyeOffset: 0.15
   },
   drawUnitVectors: function(context) {
+
+    function drawArrow(x0, y0, x1, y1){
+        var arrowHeadLength = 0.04;
+        var angle = Math.atan2(y1 - y0, x1 - x0);
+        context.moveTo(x0, y0);
+        context.lineTo(x1, y1);
+        context.lineTo(x1 - arrowHeadLength * Math.cos(angle - Math.PI / 8), y1 - arrowHeadLength * Math.sin(angle - Math.PI / 8));
+        context.moveTo(x1, y1);
+        context.lineTo(x1 - arrowHeadLength * Math.cos(angle + Math.PI / 8), y1 - arrowHeadLength * Math.sin(angle + Math.PI / 8));
+    }
+
     line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [1, 0, 0]], this.observer);
-    context.moveTo(line2d[0][0], line2d[0][1]);
-    context.lineTo(line2d[1][0], line2d[1][1]);
-
-    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [0, 1, 0]], this.observer);
-    context.moveTo(line2d[0][0], line2d[0][1]);
-    context.lineTo(line2d[1][0], line2d[1][1]);
-
-    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [0, 0, 1]], this.observer);
-    context.moveTo(line2d[0][0], line2d[0][1]);
-    context.lineTo(line2d[1][0], line2d[1][1]);
-
-    // Draw
+    context.beginPath();
+    drawArrow(line2d[0][0], line2d[0][1], line2d[1][0], line2d[1][1]);
     context.strokeStyle = "#f00";
     context.stroke();
+
+    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [0, 1, 0]], this.observer);
+    context.beginPath();
+    drawArrow(line2d[0][0], line2d[0][1], line2d[1][0], line2d[1][1]);
+    context.strokeStyle = "#0f0";
+    context.stroke();
+
+    line2d = linalg.projectLineFrom3dTo2d([[0, 0, 0], [0, 0, 1]], this.observer);
+    context.beginPath();
+    drawArrow(line2d[0][0], line2d[0][1], line2d[1][0], line2d[1][1]);
+    context.strokeStyle = "#00f";
+    context.stroke();
+
   },
   drawCoordinateSystem: function(context) {
     let k = 10;
@@ -114,7 +129,6 @@ let world3d = {
       // context.lineTo(p1[0], p1[1]);
 
       // Do it for lines rather than points, to clip the line when it's on the wrong side of the projection plane.
-
       let r = context.canvas.width / context.canvas.height / 2;
       let eyeOffset = 0.15;
       let line2d;
@@ -151,8 +165,16 @@ let world3d = {
     context.stroke();
   },
   render: function(context) {
+    let r = context.canvas.width / context.canvas.height / 2;
+    let eyeOffset = 0.15;
+
     // this.drawCoordinateSystem(context);
+    context.save();
+    context.translate(r, 0);
     this.drawUnitVectors(context);
+    context.translate(-2*r, 0);
+    this.drawUnitVectors(context);
+    context.restore();
     this.drawCube(context);
     this.drawSeparator(context);
   }
@@ -160,9 +182,6 @@ let world3d = {
 
 
 let app = {
-  canvasState: new CanvasState('canvas'),
-  outputObserver: document.getElementById('observer'),
-  outputFps: document.getElementById('fps'),
   updateMeta: function() {
     this.outputObserver.textContent = JSON.stringify(
       world3d.observer,
@@ -247,8 +266,7 @@ let app = {
 
     if (ui.keys.w) {
       let r = [0, 0, 1];
-      // let rTransformed = linalg.mul(rotationMatrix, r);
-      // world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(rTransformed, aInc));
+      r = linalg.mul(rotationMatrix, r);
       world3d.observer.a = linalg.sub(world3d.observer.a, linalg.sMul(r, aInc));
     }
 
@@ -299,12 +317,16 @@ let app = {
 
   },
   init: function() {
-    ui.preventDefaultFor('right left up down f s e d w r j pInc ctrl+j ctrl+k');
-    this.canvasState.fps.onUpdate = this.updateFps.bind(this);
-    this.canvasState.loop(function() {
+    this.outputObserver = document.getElementById('observer');
+    this.outputFps = document.getElementById('fps');
+
+    this.cs = new CanvasState('canvas');
+    ui.preventDefaultFor('right left up down f s e d w r j k ctrl+j ctrl+k');
+    this.cs.fps.onUpdate = this.updateFps.bind(this);
+    this.cs.loop(function() {
       this.reactToUserInput();
       this.updateMeta();
-      world3d.render(this.canvasState.context);
+      world3d.render(this.cs.context);
     }.bind(this));
   }
 };
